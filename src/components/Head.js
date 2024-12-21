@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { toggleMenu } from "../utils/appSlice";
 import { YOUTUBE_SEARCH_API } from "../utils/constants";
 import { addSuggestionData } from "../utils/cacheSuggestionSlice";
+import { addQuery } from "../utils/suggestSlice";
+import { Navigate } from "react-router-dom";
 
 const Head = () => {
   const dispatch = useDispatch();
@@ -10,11 +12,14 @@ const Head = () => {
   const [suggestedData, setSuggestedData] = useState([]);
   const [showSuggestion, setShowSuggestion] = useState(false);
   const dataPresent = useSelector((state) => state.cache);
+  const handleSubmit = (s) => {
+    dispatch(addQuery(s));
+    <Navigate to={"/"} />;
+  };
 
   useEffect(() => {
     if (dataPresent[suggestion]) {
       setSuggestedData(dataPresent[suggestion]);
-      console.log(dataPresent[suggestion]);
     } else {
       const timer = setTimeout(() => {
         searchQuery();
@@ -54,7 +59,7 @@ const Head = () => {
           src="https://upload.wikimedia.org/wikipedia/commons/3/34/YouTube_logo_%282017%29.png"
         />
       </div>
-      <div className="col-span-10  text-nowrap">
+      <div className="col-span-10 relative text-nowrap">
         <div>
           <input
             type="text "
@@ -62,18 +67,26 @@ const Head = () => {
             value={suggestion}
             onChange={(e) => setSuggestion(e.target.value)}
             onFocus={() => setShowSuggestion(true)}
-            onBlur={() => setShowSuggestion(false)}
+            onBlur={() =>
+              setTimeout(() => {
+                setShowSuggestion(false);
+              }, 200)
+            }
           />
           <button className="border border-black py-2 px-4 rounded-r-full">
             🔍
           </button>
         </div>
 
-        {showSuggestion && suggestedData.length > 0 && (
+        {showSuggestion && suggestedData.length > 1 && (
           <div className="absolute bg-white w-[590px] py-2 rounded-lg shadow-xl">
             <ul>
               {suggestedData.map((s) => (
-                <li className="px-5 py-2 hover:bg-gray-100 select-none ">
+                <li
+                  key={s}
+                  className="px-5 py-2 hover:bg-gray-100 select-none "
+                  onClick={() => handleSubmit(s)}
+                >
                   🔍 {s}
                 </li>
               ))}

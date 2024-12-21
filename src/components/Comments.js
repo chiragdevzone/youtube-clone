@@ -1,104 +1,56 @@
-import React from "react";
-
-const commentsData = [
-  {
-    name: "chirag sankhla",
-    text: "this is a dummy comment",
-    reply: [],
-  },
-  {
-    name: "chirag sankhla",
-    text: "this is a dummy comment",
-    reply: [
-      {
-        name: "chetan saini",
-        text: "this is a dummy reply",
-        reply: [],
-      },
-    ],
-  },
-  {
-    name: "chirag sankhla",
-    text: "this is a dummy comment",
-    reply: [],
-  },
-  {
-    name: "chirag sankhla",
-    text: "this is a dummy comment",
-    reply: [
-      {
-        name: "chetan saini",
-        text: "this is a dummy reply",
-        reply: [],
-      },
-    ],
-  },
-  {
-    name: "chirag sankhla",
-    text: "this is a dummy comment",
-    reply: [],
-  },
-  {
-    name: "chirag sankhla",
-    text: "this is a dummy comment",
-    reply: [
-      {
-        name: "chetan saini",
-        text: "this is a dummy reply",
-        reply: [
-          {
-            name: "shyam saini",
-            text: "this is reply of reply",
-            reply: [],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    name: "chirag sankhla",
-    text: "this is a dummy comment",
-    reply: [],
-  },
-];
+import React, { useEffect, useState } from "react";
+import { YOUTUBE_VIDEO_COMMENTS } from "../utils/constants";
 
 const Comment = ({ data }) => {
-  const { name, text } = data;
+  const {
+    authorDisplayName,
+    textDisplay,
+    authorProfileImageUrl = "https://static.vecteezy.com/system/resources/thumbnails/019/879/198/small_2x/user-icon-on-transparent-background-free-png.png",
+  } = data.snippet.topLevelComment.snippet;
 
   return (
-    <div className="flex items-center m-2 p-2">
+    <div className="flex m-2 p-2">
       <img
-        className="w=8 h-8"
+        className="w=8 h-8 rounded-full"
         alt="user"
-        src="https://static.vecteezy.com/system/resources/thumbnails/019/879/198/small_2x/user-icon-on-transparent-background-free-png.png"
+        src={authorProfileImageUrl}
       />
 
-      <ul className="leading-none">
-        <li className="font-bold">{name}</li>
-        <li className="text-sm">{text}</li>
+      <ul className="leading-none mx-4">
+        <li className="font-bold">{authorDisplayName}</li>
+        <li className="text-sm">{textDisplay}</li>
       </ul>
     </div>
   );
 };
 
 const CommentList = ({ data }) => {
-  return data?.map((c, index) => (
-    <div key={index}>
-      <Comment data={c} />
-
-      {c?.reply?.length > 0 && Array.isArray(c?.reply) && c?.reply && (
-        <div className="ml-8  border-l-2 border-black">
-          <CommentList data={c?.reply} />
-        </div>
-      )}
-    </div>
-  ));
+  return (
+    <>
+      {data.map((item, i) => (
+        <Comment key={i} data={item} />
+      ))}
+    </>
+  );
 };
 
-const Comments = () => {
+const Comments = ({ videoId }) => {
+  const [videoComments, setvideoComments] = useState([]);
+  useEffect(() => {
+    getComments();
+  }, []);
+
+  const getComments = async () => {
+    const data = await fetch(
+      YOUTUBE_VIDEO_COMMENTS + videoId + "&maxResults=50"
+    );
+    const json = await data.json();
+    setvideoComments(json.items);
+  };
+
   return (
     <div className="p-4">
-      <CommentList data={commentsData} />
+      <CommentList data={videoComments} />
     </div>
   );
 };
